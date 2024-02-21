@@ -1,0 +1,114 @@
+import { Product } from "../models/product.model.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
+
+const getAllProducts = asyncHandler(async (req, resp) => {
+    try {
+        const data = await Product.find()
+        return resp
+            .status(200)
+            .json({
+                status: true,
+                statusCode: 200,
+                product: data,
+            })
+    } catch (error) {
+        return resp
+            .status(400)
+            .json({
+                status: false,
+                statusCode: 400,
+                message: "error",
+            })
+    }
+})
+const createProduct = asyncHandler(async (req, resp) => {
+    try {
+        const { name, price, description } = req.body;
+        const createProduct = await Product.create({ name, price, description })
+        console.log(createProduct)
+        return resp
+            .status(200)
+            .json({
+                status: true,
+                statusCode: 201,
+                product: createProduct,
+            })
+    } catch (error) {
+        return resp
+            .status(400)
+            .json({
+                status: false,
+                statusCode: 404,
+                message: error
+            })
+
+    }
+})
+const updateProduct = asyncHandler(async (req, resp) => {
+    try {
+        const { id } = req?.params
+        const { name, price, description } = req.body;
+        const updatedProduct = await Product.findByIdAndUpdate(id, { name, price, description }, { new: true })
+        if (!updatedProduct) {
+            return resp
+                .status(404)
+                .json({
+                    status: false,
+                    statusCode: 404,
+                    message: 'product not updated'
+                })
+        }
+        return resp
+            .status(200)
+            .json({
+                status: true,
+                statusCode: 200,
+                data: updatedProduct
+            })
+    } catch (error) {
+        return resp
+            .status(200)
+            .json({
+                status: false,
+                statusCode: 404,
+                message: error
+            })
+    }
+})
+const deleteProduct = asyncHandler(async (req, resp) => {
+    try {
+        const { id } = req.params
+        const deleteProduct = await Product.findByIdAndDelete(id)
+
+        if (!deleteProduct) {
+            return resp
+                .status(404)
+                .json({
+                    status: false,
+                    statusCode: 404,
+                    message: 'product not deleted'
+                })
+        }
+        return resp
+            .status(200)
+            .json({
+                status: true,
+                statusCode: 200,
+                message: deleteProduct,
+                message: 'product deleted'
+            })
+
+    } catch (error) {
+
+        return resp
+            .status(404)
+            .json({
+                status: false,
+                statusCode: 404,
+                message: error
+            })
+
+    }
+})
+
+export { getAllProducts, createProduct, updateProduct, deleteProduct }
