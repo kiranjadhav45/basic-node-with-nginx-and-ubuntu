@@ -3,13 +3,19 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 
 const getAllProducts = asyncHandler(async (req, resp) => {
     try {
-        const data = await Product.find()
+        const page = req.query.page || 1
+        const pageSize = req.query.pageSize || 10
+        const totalCount = await Product.countDocuments();
+        const data = await Product.find().skip((page - 1) * pageSize).limit(pageSize)
         return resp
             .status(200)
             .json({
                 status: true,
                 statusCode: 200,
                 product: data,
+                totalCount,
+                page,
+                pageSize
             })
     } catch (error) {
         return resp
