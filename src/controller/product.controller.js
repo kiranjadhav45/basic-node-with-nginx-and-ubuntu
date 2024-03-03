@@ -30,7 +30,18 @@ const getAllProducts = asyncHandler(async (req, resp) => {
 const createProduct = asyncHandler(async (req, resp) => {
     try {
         const { name, price, description } = req.body;
-        const createProduct = await Product.create({ name, price, description })
+        const user = req.user
+
+        if (!user) {
+            return resp
+                .status(400)
+                .json({
+                    status: false,
+                    statusCode: 404,
+                    message: "user not found"
+                })
+        }
+        const createProduct = await Product.create({ name, price, description, createdBy: user._id })
         console.log(createProduct)
         return resp
             .status(200)
@@ -47,7 +58,6 @@ const createProduct = asyncHandler(async (req, resp) => {
                 statusCode: 404,
                 message: error
             })
-
     }
 })
 const updateProduct = asyncHandler(async (req, resp) => {
