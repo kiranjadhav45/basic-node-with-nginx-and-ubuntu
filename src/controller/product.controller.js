@@ -1,5 +1,26 @@
 import { Product } from "../models/product.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
+
+const uploadImage = async (req, resp) => {
+
+    const avatarLocalPath = req.file?.path
+
+    if (!avatarLocalPath) {
+        return resp.json({
+            status: 400,
+            message: "Avatar file is missing"
+        })
+
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+    return resp.json({
+        status: 200,
+        data: avatar
+    })
+}
 
 const getAllProducts = asyncHandler(async (req, resp) => {
     try {
@@ -29,6 +50,7 @@ const getAllProducts = asyncHandler(async (req, resp) => {
 })
 const createProduct = asyncHandler(async (req, resp) => {
     try {
+
         const { name, price, description } = req.body;
         const user = req.user
 
@@ -127,4 +149,4 @@ const deleteProduct = asyncHandler(async (req, resp) => {
     }
 })
 
-export { getAllProducts, createProduct, updateProduct, deleteProduct }
+export { getAllProducts, createProduct, updateProduct, deleteProduct, uploadImage }
