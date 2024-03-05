@@ -2,24 +2,26 @@ import { Product } from "../models/product.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
-const uploadImage = async (req, resp) => {
+const uploadImage = async (req, resp, next) => {
 
     const avatarLocalPath = req.file?.path
 
     if (!avatarLocalPath) {
         return resp.json({
             status: 400,
-            message: "Avatar file is missing"
+            message: "image is missing"
         })
 
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
+    req.productURL = avatar
+    next()
 
-    return resp.json({
-        status: 200,
-        data: avatar
-    })
+    // return resp.json({
+    //     status: 200,
+    //     data: avatar
+    // })
 }
 
 const getAllProducts = asyncHandler(async (req, resp) => {
@@ -43,6 +45,7 @@ const getAllProducts = asyncHandler(async (req, resp) => {
             .status(400)
             .json({
                 status: false,
+
                 statusCode: 400,
                 message: "error",
             })
@@ -50,7 +53,7 @@ const getAllProducts = asyncHandler(async (req, resp) => {
 })
 const createProduct = asyncHandler(async (req, resp) => {
     try {
-
+        const url = req.productURL.url
         const { name, price, description } = req.body;
         const user = req.user
 
@@ -63,7 +66,7 @@ const createProduct = asyncHandler(async (req, resp) => {
                     message: "user not found"
                 })
         }
-        const createProduct = await Product.create({ name, price, description, createdBy: user._id })
+        const createProduct = await Product.create({ name, price, description, createdBy: user._id, image: url })
         console.log(createProduct)
         return resp
             .status(200)
